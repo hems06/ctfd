@@ -1,4 +1,4 @@
-version: '3.9'
+
 
 services:
   ctfd:
@@ -48,7 +48,7 @@ services:
 
   scoring_engine:
     build:
-      context: ./ctfd
+      context: .
       dockerfile: Dockerfile.scoring_engine
     restart: always
     depends_on:
