@@ -2,7 +2,9 @@
 
 services:
   ctfd:
-    image: ctfd/ctfd:latest
+    build:
+      context: ./ctfd
+      dockerfile: Dockerfile.ctfd
     user: root
     restart: always
     depends_on:
@@ -23,6 +25,7 @@ services:
       - ./ctfd/.data/CTFd/logs:/var/log/CTFd
       - ./ctfd/.data/CTFd/uploads:/var/uploads
       - ./ctfd/plugins/whitelist_auth:/opt/CTFd/CTFd/plugins/whitelist_auth:ro
+      - ./ctfd/plugins/scoring_engine:/opt/CTFd/CTFd/plugins/scoring_engine:ro
       - ./ctfd/emails.txt:/opt/CTFd/emails.txt:ro
 
   db:
@@ -46,15 +49,7 @@ services:
     networks:
       - internal
 
-  scoring_engine:
-    build:
-      context: .
-      dockerfile: Dockerfile.scoring_engine
-    restart: always
-    depends_on:
-      - db
-    networks:
-      - internal
+
 
 
 networks:

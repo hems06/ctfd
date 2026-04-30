@@ -1,0 +1,4 @@
+FROM ctfd/ctfd:latest
+USER root
+RUN pip install apscheduler
+USER 1001
