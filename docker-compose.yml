@@ -1,0 +1,63 @@
+version: '3.9'
+
+services:
+  ctfd:
+    image: ctfd/ctfd:latest
+    user: root
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - default
+      - internal
+    ports:
+      - "8000:8000"
+    environment:
+      - UPLOAD_FOLDER=/var/uploads
+      - DATABASE_URL=mysql+pymysql://ctfd:ctfd@db/ctfd
+      - REDIS_URL=redis://cache:6379
+      - WORKERS=1
+      - LOG_FOLDER=/var/log/CTFd
+      - REVERSE_PROXY=true
+    volumes:
+      - ./ctfd/.data/CTFd/logs:/var/log/CTFd
+      - ./ctfd/.data/CTFd/uploads:/var/uploads
+      - ./ctfd/plugins/whitelist_auth:/opt/CTFd/CTFd/plugins/whitelist_auth:ro
+      - ./ctfd/emails.txt:/opt/CTFd/emails.txt:ro
+
+  db:
+    image: mariadb:10.4.12
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=ctfd
+      - MYSQL_USER=ctfd
+      - MYSQL_PASSWORD=ctfd
+      - MYSQL_DATABASE=ctfd
+    volumes:
+      - ./ctfd/.data/mysql:/var/lib/mysql
+    networks:
+      - internal
+
+  cache:
+    image: redis:4
+    restart: always
+    volumes:
+      - ./ctfd/.data/redis:/data
+    networks:
+      - internal
+
+  scoring_engine:
+    build:
+      context: ./ctfd
+      dockerfile: Dockerfile.scoring_engine
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - internal
+
+
+networks:
+  default:
+  internal:
+    internal: true
